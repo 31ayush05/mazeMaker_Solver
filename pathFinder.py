@@ -80,9 +80,9 @@ def makeMaze(mX,mY,sc=10):
             s = src[k]
 
             # initial PathLooping
-            j = 5
+            j = 30
             if k == 0:
-                j = 20
+                j = 5
 
             # LOOP
             for iPl in range(j):

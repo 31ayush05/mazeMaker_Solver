@@ -446,10 +446,10 @@ def solve(root,cv,mX,mY,mzArr,sc):
         # loop has ended
         pass
 
-sc = int(input("ENTER cell size : ")) * 2
-mX = int(input("ENTER X dimension of maze : ")) * sc
-mY = int(input("ENTER Y dimension of maze : ")) * sc
-dT = int(float(input("ENTER deltaTime(in seconds) : ")) * 1000)
+sc = int(input("ENTER cell size <5> : ")) * 2
+mX = int(input("ENTER X dimension of maze <0-120 for 3K resolution> : ")) * sc
+mY = int(input("ENTER Y dimension of maze <0-80 for 3K resolution> : ")) * sc
+dT = int(float(input("ENTER deltaTime(in seconds) <0.01> : ")) * 1000)
 
 # declaring basic window
 root = tk.Tk()

@@ -50,13 +50,6 @@ values = [0, 0.25, 0.5, 0.75, 1]
 #-------  0,  1  ,  2  , 3  , 4
 cmap = matplotlib.colors.LinearSegmentedColormap.from_list("", list(zip(values, colors)))
 
-print("choose X and Y to be 1 or 2 for optimal performance\ngoing beyond these values causes the product")
-print("to increase at a high rate.... product >10K causes high ping ... ~20K causes serious slow performance")
-print(">30K begins to kill python and matplotlib all at once")
-print("number of nodes >= 10 in all cases ... dont set x_res or y_res to be 0")
-print("thickness should be lower for lower values of resolution lowest shall be taken as 7")
-print("noise reduction 1 is minimum 3 gives a nice performance beyond this is useless")
-
 x_res = int(input("ENTER X : ")) * 100
 y_res = int(input("ENTER Y : ")) * 100
 N = int(input("ENTER number of base nodes(>10) : "))
@@ -77,12 +70,15 @@ for y in range(y_res):
     grid.append(empty.copy())
 
 
-def modifyGrid(pos, newVal):
+def modifyGrid(pos=None, newVal=None, x=None, y=None):
     global grid
     try:
-        grid[pos.y][pos.x] = newVal
+        if pos is not None:
+            grid[pos.y][pos.x] = newVal
+        else:
+            grid[y][x] = newVal
     except:
-        print(pos)
+        print(pos, x, y)
         return 1/0
 
 state = 0
@@ -104,22 +100,42 @@ visited = []
 finalPath = []
 reps = 0
 
-def getRandomPointNearby(point):
+def getRandomPointNearby(point, normal=False):
     validPoints = []
-    if (point.x != 0) and (point.x != x_res-1):
-        validPoints.append(coord(point.x-1,point.y))
-        validPoints.append(coord(point.x+1,point.y))
-    if (point.y != 0) and (point.y != y_res-1):
-        validPoints.append(coord(point.x,point.y-1))
-        validPoints.append(coord(point.x,point.y+1))
-    if (point.x != 0) and (point.y!= 0):
-        validPoints.append(coord(point.x-1,point.y-1))
-    if (point.x != 0) and (point.y!= y_res-1):
-        validPoints.append(coord(point.x-1,point.y+1))
-    if (point.x != x_res-1) and (point.y!= 0):
-        validPoints.append(coord(point.x+1,point.y-1))
-    if (point.x != x_res-1) and (point.y!= y_res-1):
-        validPoints.append(coord(point.x+1,point.y+1))
+
+    if type(point) == type(coord(0,0)):
+        point = (point.x, point.y)
+
+    if not normal:
+        if (point[0] != 0) and (point[0] != x_res-1):
+            validPoints.append(coord(point[0]-1,point[1]))
+            validPoints.append(coord(point[0]+1,point[1]))
+        if (point[1] != 0) and (point[1] != y_res-1):
+            validPoints.append(coord(point[0],point[1]-1))
+            validPoints.append(coord(point[0],point[1]+1))
+        if (point[0] != 0) and (point[1]!= 0):
+            validPoints.append(coord(point[0]-1,point[1]-1))
+        if (point[0] != 0) and (point[1]!= y_res-1):
+            validPoints.append(coord(point[0]-1,point[1]+1))
+        if (point[0] != x_res-1) and (point[1]!= 0):
+            validPoints.append(coord(point[0]+1,point[1]-1))
+        if (point[0] != x_res-1) and (point[1]!= y_res-1):
+            validPoints.append(coord(point[0]+1,point[1]+1))
+    else:
+        if (point[0] != 0) and (point[0] != x_res-1):
+            validPoints.append((point[0]-1,point[1]))
+            validPoints.append((point[0]+1,point[1]))
+        if (point[1] != 0) and (point[1] != y_res-1):
+            validPoints.append((point[0],point[1]-1))
+            validPoints.append((point[0],point[1]+1))
+        if (point[0] != 0) and (point[1]!= 0):
+            validPoints.append((point[0]-1,point[1]-1))
+        if (point[0] != 0) and (point[1]!= y_res-1):
+            validPoints.append((point[0]-1,point[1]+1))
+        if (point[0] != x_res-1) and (point[1]!= 0):
+            validPoints.append((point[0]+1,point[1]-1))
+        if (point[0] != x_res-1) and (point[1]!= y_res-1):
+            validPoints.append((point[0]+1,point[1]+1))
     
     return [validPoints[random.randint(0,len(validPoints)-1)], validPoints]
 
@@ -268,8 +284,8 @@ def generate_data():
         tNodeList = []
         nodeList = []
 
-        origin = origin.pos
-        target = target.pos
+        origin = (origin.pos.x, origin.pos.y)
+        target = (target.pos.x, target.pos.y)
 
         # make required lists
         paths = [[origin]]
@@ -285,7 +301,9 @@ def generate_data():
                 path = paths[ind]
 
                 endPoint = path[-1]
-                nearby = getRandomPointNearby(endPoint)[1]
+                nearby = getRandomPointNearby(endPoint, normal=True)[1]
+
+                # print(nearby)
 
                 if target in nearby:
                     finalPath = path.copy()
@@ -296,7 +314,7 @@ def generate_data():
                 # purify nearby list
                 purifiedList = []
                 for n in nearby:
-                    if (n not in visited) and (grid[n.y][n.x] == 4):
+                    if (n not in visited) and (grid[n[1]][n[0]] == 4):
                         purifiedList.append(n)
 
                 if len(purifiedList) == 0:
@@ -311,7 +329,7 @@ def generate_data():
                             newPath = savePath.copy()
                             newPath.append(purifiedList[nInd])
                             addPath.append(newPath)
-                        modifyGrid(purifiedList[nInd], 1)
+                        modifyGrid(pos=None, newVal=1, x=purifiedList[nInd][0], y=purifiedList[nInd][1])
                         visited.append(purifiedList[nInd])
             if reached:
                 # clearing big variables
@@ -331,7 +349,7 @@ def generate_data():
     elif (state == 7):
         # final path display
         for n in finalPath:
-            modifyGrid(n,3)
+            modifyGrid(pos=None, newVal=3, x=n[0], y=n[1])
         # END
         state = 8
     else:
